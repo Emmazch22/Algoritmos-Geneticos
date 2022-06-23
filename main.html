@@ -52,11 +52,112 @@ var cvs = document.getElementById('canvas');
 var ctx = cvs.getContext('2d');
 img.crossOrigin = "Anonymous";
 var population = [];
+var bestPopulation = [];
+var worstPopulation = [];
 canvas= [];
 context= [];
 var imgData ;
-var nImages= 15 ;
+var nImages= 20 ;
 var imageData= [] ;
+
+
+img.onload = function() {
+    //crossover(population[0], population[1]);
+    ctx.drawImage( img, 0, 0 );
+    imgData= ctx.getImageData(0,0,100,100) ;
+    table= document.getElementById('table') ;
+    generarPoblacionInicial();
+    for(var generation = 0; generation < 1; generation++){
+        for (var i=0; i<nImages;i++){
+            canvas[i]= document.createElement("canvas");
+            canvas[i].width= canvas[i].height= "100";
+            context[i]= canvas[i].getContext('2d');
+            getImage(context[i], population[i]);
+            //context[i].putImageData(imgData,0,0) ;
+            imageData[i]= context[i].getImageData(0,0,100,100);
+            context[i].font = 'italic 10pt Calibri';
+            var similarityImages = similarity(imgData, imageData[i]);
+            population[i][population[i].length] = similarityImages;
+            context[i].fillText(similarityImages,10,95);
+        }
+
+        selection();
+
+        for(var i = 0; i < nImages; i++){
+            if (i%5==0) {
+                row= table.insertRow(table.rows.length) ;
+            }
+            canvas[i]= document.createElement("canvas") ;
+            canvas[i].width= canvas[i].height= "100" ;
+            context[i]= canvas[i].getContext('2d') ;
+            getImage(context[i], population[i]) ;
+            //context[i].putImageData(imgData,0,0) ;
+            imageData[i] = context[i].getImageData(0,0,100,100) ;
+            context[i].font = 'italic 10pt Calibri';
+            var similarityImages = similarity(imgData, imageData[i]);
+            context[i].fillText(similarityImages,10,95);
+            row.appendChild(canvas[i]) ;
+        }
+    }
+}
+
+img.src = src;
+
+function getImage(context, imagen) {
+
+    for(var c = 0; c < imagen.length; c++){
+        if(imagen[c].tipo == "Circulo"){
+            drawCircle(context,imagen[c].x1,imagen[c].y1, imagen[c].x2, imagen[c].fill,3,imagen[c].stroke) ;
+        } else if(imagen[c].tipo == "Linea"){
+            drawLine(context,imagen[c].x1,imagen[c].y1,imagen[c].x2,imagen[c].y2,imagen[c].fill,imagen[c].stroke);
+        } else{
+            lineWidth= Math.floor((Math.random() * 5) + 1);
+            drawRectangle(context, imagen[c].x1,imagen[c].y1,imagen[c].x2,imagen[c].y2,imagen[c].fill, lineWidth, imagen[c].stroke) ;
+        }
+    }
+}
+
+function drawRectangle(context,x1,y1,x2,y2,fill,lineWidth,stroke) {
+	  context.beginPath();
+      context.rect(x1, y1, x2, y2);
+      context.fillStyle = fill ;
+      context.fill();
+      context.lineWidth = lineWidth;
+      context.strokeStyle = stroke;
+      context.stroke();
+}
+
+function drawLine(context,x1,y1,x2,y2,lineWidth,stroke) {
+	  context.beginPath();
+      context.moveTo(x1, y1);
+      context.lineTo(x2, y2);
+      context.lineWidth= lineWidth ;
+      context.strokeStyle= stroke ;
+      context.stroke();
+}
+
+function drawCircle(context, x,y,radius,fill,lineWidth,stroke) {
+	  context.beginPath();
+      context.arc(x, y, radius, 0, 2 * Math.PI, false);
+      context.fillStyle = fill;
+      context.fill();
+      context.lineWidth = lineWidth;
+      context.strokeStyle = stroke;
+      context.stroke();
+}
+
+
+function similarity(imageData1, imageData2) {
+	data1= imageData1.data ;
+    data2= imageData2.data ;
+    suma=0 ;
+    for (var i=0;i<data1.length;i+=4) {
+    	suma+= Math.pow((data1[i]-data2[i]),2);
+        suma+= Math.pow((data1[i+1]-data2[i+1]),2);
+        suma+= Math.pow((data1[i+2]-data2[i+2]),2);
+    }
+    return Math.pow(suma,1/2) ;
+}
 
 function generarPoblacionInicial(){
     for(var f=0; f<nImages;f++){
@@ -103,90 +204,6 @@ function generarPoblacionInicial(){
     }
 }
 
-img.onload = function() {
-    generarPoblacionInicial();
-    crossover(population[0], population[1]);
-    ctx.drawImage( img, 0, 0 );
-    imgData= ctx.getImageData(0,0,100,100) ;
-    table= document.getElementById('table') ;
-	for (var i=0; i<nImages + 1;i++) {
-    	if (i%5==0) {
-        	row= table.insertRow(table.rows.length) ;
-        }
-    	canvas[i]= document.createElement("canvas") ;
-        canvas[i].width= canvas[i].height= "100" ;
-        context[i]= canvas[i].getContext('2d') ;
-        getImage(context[i], population[i]) ;
-
-        //context[i].putImageData(imgData,0,0) ;
-        imageData[i]= context[i].getImageData(0,0,100,100) ;
-        context[i].font = 'italic 10pt Calibri';
-        context[i].fillText(similarity(imgData,imageData[i]),10,95) ;
-        row.appendChild(canvas[i]) ;
-    }
-
-    console.log(population);
-}
-
-img.src = src;
-
-function getImage(context, imagen) {
-
-    for(var c = 0; c < imagen.length; c++){
-        if(imagen[c].tipo == "Circulo"){
-            drawCircle(context,imagen[c].x1,imagen[c].y1, imagen[c].x2, imagen[c].fill,3,imagen[c].stroke) ;
-        } else if(imagen[c].tipo == "Linea"){
-            drawLine(context,imagen[c].x1,imagen[c].y1,imagen[c].x2,imagen[c].y2,imagen[c].fill,imagen[c].stroke);
-        } else{
-            lineWidth= Math.floor((Math.random() * 5) + 1);
-            drawRectangle(context, imagen[c].x1,imagen[c].y1,imagen[c].x2,imagen[c].y2,imagen[c].fill, lineWidth, imagen[c].stroke) ;
-        }
-        
-    }
-}
-
-function drawRectangle(context,x1,y1,x2,y2,fill,lineWidth,stroke) {
-	  context.beginPath();
-      context.rect(x1, y1, x2, y2);
-      context.fillStyle = fill ;
-      context.fill();
-      context.lineWidth = lineWidth;
-      context.strokeStyle = stroke;
-      context.stroke();
-}
-
-function drawLine(context,x1,y1,x2,y2,lineWidth,stroke) {
-	  context.beginPath();
-      context.moveTo(x1, y1);
-      context.lineTo(x2, y2);
-      context.lineWidth= lineWidth ;
-      context.strokeStyle= stroke ;
-      context.stroke();
-}
-
-function drawCircle(context, x,y,radius,fill,lineWidth,stroke) {
-	  context.beginPath();
-      context.arc(x, y, radius, 0, 2 * Math.PI, false);
-      context.fillStyle = fill;
-      context.fill();
-      context.lineWidth = lineWidth;
-      context.strokeStyle = stroke;
-      context.stroke();
-}
-
-
-function similarity(imageData1, imageData2) {
-	data1= imageData1.data ;
-    data2= imageData2.data ;
-    suma=0 ;
-    for (var i=0;i<data1.length;i+=4) {
-    	suma+= Math.pow((data1[i]-data2[i]),2);
-        suma+= Math.pow((data1[i+1]-data2[i+1]),2);
-        suma+= Math.pow((data1[i+2]-data2[i+2]),2);
-    }
-    return Math.pow(suma,1/2) ;
-}
-
 function crossover(image1, image2){
     len1 = image1.length;
     len2 = image2.length;
@@ -206,14 +223,44 @@ function crossover(image1, image2){
     population.push(imageArray);
 }
 
+function sortPopulation(){
+    population.sort(function (a, b) {
+        if (a[a.length - 1] > b[b.length - 1]) {
+            return 1;
+        }
+        if (a[a.length - 1] < b[b.length - 1]) {
+            return -1;
+        }
+        return 0;
+    });
+}
+
 function get_max(n1, n2){
     if (n1 >= n2){
         return n1;
-    } 
-    else {
+    } else {
         return n2;
     }
 }
+
+function selection(){
+    sortPopulation();
+    console.log(population);
+    var best = (nImages*90/100).toFixed();
+    var worst = (nImages*10/100).toFixed();
+    var count = 0;
+    for(var i = 0; i < nImages; i++){
+        if(i < best){
+            bestPopulation[i] = population[i];
+        }else{
+            worstPopulation[count] = population[i];
+            count++;
+        }
+    }
+    console.log(bestPopulation);
+    console.log(worstPopulation);
+}
+
 
 </script>
 
