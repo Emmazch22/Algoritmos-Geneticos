@@ -261,7 +261,49 @@ function selection(){
     console.log(worstPopulation);
 }
 
+/**
+ * Mutate the genes of an individual, arbitrarily changing an element of the individual.
+ **/
+ function mutate(image){
+    len = image.length;
+    //gene to be changed from the individual
+    randomGen = Math.floor(Math.random() * len);
+    //Change the selected gen of the individual
+    image[randomGen] = getRandomFigure(Math.floor(Math.random() * 3));
 
+    return image;
+}
+/**
+ * Generates a random figure;
+ **/
+function getRandomFigure(value){
+    var newFigure;
+    //Figure parameters
+    rx1 = Math.floor((Math.random() * 100) + 1);
+    rx2 = Math.floor((Math.random() * 100) + 1);
+    ry1 = Math.floor((Math.random() * 100) + 1);
+    ry2 = Math.floor((Math.random() * 100) + 1);
+    rfill = "#"+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1);
+    rstroke = "#"+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1)+Math.floor((Math.random() * 100) + 1);
+
+    switch(value){
+        case 0:
+            //Creates a new line
+            newFigure = new Figura("Linea", rx1, ry1, rx2, ry2, rfill, rstroke);
+            break;
+        case 1:
+            //Creates a new rectangle
+            newFigure = new Figura("Rectangulo", rx1, ry1, rx2, ry2, rfill, rstroke);
+            break;
+        case 2:
+            //Creates a new circle
+            rradius = Math.floor((Math.random() * 20) + 1);
+            newFigure = new Figura("Circulo", rx1, ry1, rradius, 0, rfill, rstroke);
+            break;        
+    }
+
+    return newFigure;
+}
 </script>
 
 
