@@ -62,12 +62,12 @@ var imageData= [] ;
 
 
 img.onload = function() {
-    //crossover(population[0], population[1]);
     ctx.drawImage( img, 0, 0 );
     imgData= ctx.getImageData(0,0,100,100) ;
     table= document.getElementById('table') ;
     generarPoblacionInicial();
     for(var generation = 0; generation < 1; generation++){
+
         for (var i=0; i<nImages;i++){
             canvas[i]= document.createElement("canvas");
             canvas[i].width= canvas[i].height= "100";
@@ -78,12 +78,18 @@ img.onload = function() {
             context[i].font = 'italic 10pt Calibri';
             var similarityImages = similarity(imgData, imageData[i]);
             population[i][population[i].length] = similarityImages;
-            context[i].fillText(similarityImages,10,95);
+            
         }
-
         selection();
+        crossover();
+        showImages();
+    }
+}
 
-        for(var i = 0; i < nImages; i++){
+img.src = src;
+
+function showImages(){
+    for(var i = 0; i < population.length; i++){
             if (i%5==0) {
                 row= table.insertRow(table.rows.length) ;
             }
@@ -97,11 +103,8 @@ img.onload = function() {
             var similarityImages = similarity(imgData, imageData[i]);
             context[i].fillText(similarityImages,10,95);
             row.appendChild(canvas[i]) ;
-        }
     }
 }
-
-img.src = src;
 
 function getImage(context, imagen) {
 
@@ -204,23 +207,55 @@ function generarPoblacionInicial(){
     }
 }
 
-function crossover(image1, image2){
-    len1 = image1.length;
-    len2 = image2.length;
-    max = get_max(len1, len2);
-    console.log(max);
-    var imageArray = new Array();
+function crossover(){
+    var amountOfBadCrossovers = Math.floor(Math.random() * worstPopulation.length + 1);
+    var amountOfGoodCrossovers = nImages - amountOfBadCrossovers;
+    var count = 0;
+    var newPopulation = [];
+    console.log("Cantidad de cruces malos: ");
+    console.log(amountOfBadCrossovers);
+    console.log("Cantidad de cruces buenos: ");
+    console.log(amountOfGoodCrossovers);
+    console.log("Poblacion actual: ");
+    console.log(population);
+    for(var i = 0; i < amountOfBadCrossovers; i++){
+        var image1 = worstPopulation[Math.floor(Math.random() * worstPopulation.length)];
+        var image2 = bestPopulation[Math.floor(Math.random() * bestPopulation.length)];
+        len1 = image1.length;
+        len2 = image2.length;
+        max = get_max(len1, len2);
+        var imageArray = new Array();
+        for (var c = 0; c < max; c += 2){
+            var figure1 = image1[Math.floor(Math.random() * len1)];
+            var figure2 = image2[Math.floor(Math.random() * len2)];
+            var newFigure1 = new Figura(figure1.tipo, figure1.x1, figure1.y1, figure1.x2, figure1.y2, figure1.fill, figure1.stroke);
+            var newFigure2 = new Figura(figure2.tipo, figure2.x1, figure2.y1, figure2.x2, figure2.y2, figure2.fill, figure2.stroke)
+            imageArray.push(newFigure1);
+            imageArray.push(newFigure2);
+        }
+        newPopulation.push(imageArray);
+    }
 
-    for (var i = 0; i < max; i += 2){
-        var figure1 = image1[Math.floor(Math.random() * len1)];
-        var figure2 = image2[Math.floor(Math.random() * len2)];
-
-        imageArray.push(new Figura(figure1.tipo, figure1.x1, figure1.y1, figure1.x2, figure1.y2, figure1.fill, figure1.stroke));
-    
-        imageArray.push( new Figura(figure2.tipo, figure2.x1, figure2.y1, figure2.x2, figure2.y2, figure2.fill, figure2.stroke));
+    for (var x = 0; x < amountOfGoodCrossovers; x++){
+        var imageArray = new Array();
+        var image1 = bestPopulation[Math.floor(Math.random() * bestPopulation.length)];
+        var image2 = bestPopulation[Math.floor(Math.random() * bestPopulation.length)];
+        len1 = image1.length;
+        len2 = image2.length;
+        max = get_max(len1, len2);
+        for (var b = 0; b < max; b += 2){
+            var figure1 = image1[Math.floor(Math.random() * len1)];
+            var figure2 = image2[Math.floor(Math.random() * len2)];
+            var newFigure1 = new Figura(figure1.tipo, figure1.x1, figure1.y1, figure1.x2, figure1.y2, figure1.fill, figure1.stroke);
+            var newFigure2 = new Figura(figure2.tipo, figure2.x1, figure2.y1, figure2.x2, figure2.y2, figure2.fill, figure2.stroke)
+            imageArray.push(newFigure1);
+            imageArray.push(newFigure2);
+        } 
+        newPopulation.push(imageArray);
     } 
-    console.log(imageArray);
-    population.push(imageArray);
+    population = newPopulation;
+    console.log("Poblacion despues de cruces: ");
+    console.log(population);
 }
 
 function sortPopulation(){
@@ -245,7 +280,6 @@ function get_max(n1, n2){
 
 function selection(){
     sortPopulation();
-    console.log(population);
     var best = (nImages*90/100).toFixed();
     var worst = (nImages*10/100).toFixed();
     var count = 0;
@@ -257,8 +291,8 @@ function selection(){
             count++;
         }
     }
-    console.log(bestPopulation);
-    console.log(worstPopulation);
+    console.log("Poblacion despues de hacer la seleccion: ");
+    console.log(population);
 }
 
 /**
