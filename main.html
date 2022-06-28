@@ -82,6 +82,9 @@ img.onload = function() {
         }
         selection();
         crossover();
+        //showImages();
+        //alert("ANTES DE MUTAR");
+        mutate()
         showImages();
     }
 }
@@ -298,14 +301,27 @@ function selection(){
 /**
  * Mutate the genes of an individual, arbitrarily changing an element of the individual.
  **/
- function mutate(image){
-    len = image.length;
-    //gene to be changed from the individual
-    randomGen = Math.floor(Math.random() * len);
-    //Change the selected gen of the individual
-    image[randomGen] = getRandomFigure(Math.floor(Math.random() * 3));
+ function mutate(){
+    //Randomly choose the individuals to be mutated, 10% of the total population is chosen
+    total = Math.floor(population.length * 0.10);
+    console.log("Total de individuos a mutar");
+    console.log(total);
 
-    return image;
+    counter = 0
+    while (counter < total){
+        //Randomly choose an individual of the population
+        randomIndividual = Math.floor(Math.random() * nImages);
+        console.log("Individuo a mutar");
+        console.log(randomIndividual);
+        len = population[randomIndividual].length;
+        //Random gen of the individual
+        randomGen = Math.floor(Math.random() * len);
+        randomFigure = Math.floor(Math.random() * 3);
+
+        //Change the gen of the individual
+        population[randomIndividual][randomGen] = getRandomFigure(randomFigure);
+        counter += 1;
+    }
 }
 /**
  * Generates a random figure;
