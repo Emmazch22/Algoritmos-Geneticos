@@ -76,7 +76,7 @@ function run(){
     var generation = 0;
     var minorSimilarity = 999999; //Initialize with a large value
     //while (minorSimilarity >= 3000){
-    while(generation != 10){
+    while(minorSimilarity >= 3000){
         //Calculate the similarity of the images
         for (var i=0; i<nImages;i++){
             canvas[i]= document.createElement("canvas");
@@ -88,17 +88,17 @@ function run(){
             context[i].font = 'italic 10pt Calibri';
             var similarityImages = similarity(imgData, imageData[i]);
             population[i][population[i].length - 1] = similarityImages;
-            console.log(population[i]);
         }
-        //selection();
-        //crossover();
-        //mutate();
-        //minorSimilarity = getMinorSimilarity();
+        selection();
+        crossover();
+        mutate();
+        minorSimilarity = getMinorSimilarity();
+        console.log("Mejor similaridad" + minorSimilarity);
         //Show the images every 500 generations
         if (generation % 500 == 0){
+            setTimeout(showImages, 2000);
             showImages();
         }
-        console.log(population);
         generation += 1;
         console.log("Generación: " + generation);
     }
@@ -232,12 +232,6 @@ function crossover(){
     var amountOfGoodCrossovers = nImages - amountOfBadCrossovers;
     var count  = 0;
     var newPopulation = [];
-    console.log("Cantidad de cruces malos: ");
-    console.log(amountOfBadCrossovers);
-    console.log("Cantidad de cruces buenos: ");
-    console.log(amountOfGoodCrossovers);
-    console.log("Poblacion actual: ");
-    console.log(population);
     for(var i = 0; i < amountOfBadCrossovers; i++){
         var image1 = worstPopulation[Math.floor(Math.random() * worstPopulation.length)];
         var image2 = bestPopulation[Math.floor(Math.random() * bestPopulation.length)];
@@ -288,8 +282,6 @@ function crossover(){
     for(var index = 0; index < newPopulation.length; index++){
         population[index] = newPopulation[index];
     }
-    console.log("Poblacion despues de cruces: ");
-    console.log(population);
 }
 
 function sortPopulation(){
@@ -314,15 +306,13 @@ function selection(){
     var worst = (nImages*10/100).toFixed();
     var count = 0;
     for(var i = 0; i < nImages; i++){
-        // if(i < best){
-        //     bestPopulation[i] = population[i];
-        // }else{
-        //     worstPopulation[count] = population[i];
-        //     count++;
-        // }
+        if(i < best){
+            bestPopulation[i] = population[i];
+        }else{
+            worstPopulation[count] = population[i];
+            count++;
+        }
     }
-    console.log("Poblacion despues de hacer la seleccion: ");
-    console.log(population);
 }
 
 /**
@@ -331,15 +321,11 @@ function selection(){
  function mutate(){
     //Randomly choose the individuals to be mutated, 10% of the total population is chosen
     total = Math.floor(population.length * 0.10);
-    console.log("Total de individuos a mutar");
-    console.log(total);
 
     counter = 0
     while (counter < total){
         //Randomly choose an individual of the population
         randomIndividual = Math.floor(Math.random() * nImages);
-        console.log("Individuo a mutar");
-        console.log(randomIndividual);
         len = population[randomIndividual].length;
         //Random gen of the individual
         randomGen = Math.floor(Math.random() * len);
@@ -381,16 +367,15 @@ function getRandomFigure(value){
 
     return newFigure;
 }
-/**
- * Returns the minor similarity of the tota
- */
+
 function getMinorSimilarity(){
-    var similarityArray = []
+    var similarityArray = [];
     for (var i = 0; i < nImages; ++i){
         similarityArray.push(similarity(imgData, imageData[i]))
     }
     return Math.min.apply(Math, similarityArray)
 }
+
 </script>
 
 
