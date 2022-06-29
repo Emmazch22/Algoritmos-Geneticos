@@ -65,9 +65,18 @@ img.onload = function() {
     ctx.drawImage( img, 0, 0 );
     imgData= ctx.getImageData(0,0,100,100) ;
     table= document.getElementById('table') ;
-    generarPoblacionInicial();
-    for(var generation = 0; generation < 1; generation++){
+    console.log(population);
+    const myTimeout = setTimeout(run, 5000);
+    //run();
+}
 
+function run(){
+    alert("Generación de población inicial");
+    generarPoblacionInicial();
+    var generation = 0;
+    var minorSimilarity = 999999; //Initialize with a large value
+    while (minorSimilarity >= 3000){
+        //Calculate the similarity of the images
         for (var i=0; i<nImages;i++){
             canvas[i]= document.createElement("canvas");
             canvas[i].width= canvas[i].height= "100";
@@ -82,11 +91,16 @@ img.onload = function() {
         }
         selection();
         crossover();
-        //showImages();
-        //alert("ANTES DE MUTAR");
-        mutate()
-        showImages();
+        mutate();
+        minorSimilarity = getMinorSimilarity();
+        //Show the images every 500 generations
+        if (generation % 500 == 0){
+            showImages();
+        }
+        generation += 1
+        console.log("Generación: " + generation);
     }
+    alert("Solución óptima encontrada después de: " + generation + " generaciones");
 }
 
 img.src = src;
@@ -274,11 +288,7 @@ function sortPopulation(){
 }
 
 function get_max(n1, n2){
-    if (n1 >= n2){
-        return n1;
-    } else {
-        return n2;
-    }
+    return Math.max(n1, n2);
 }
 
 function selection(){
@@ -353,6 +363,16 @@ function getRandomFigure(value){
     }
 
     return newFigure;
+}
+/**
+ * Returns the minor similarity of the tota
+ */
+function getMinorSimilarity(){
+    var similarityArray = []
+    for (var i = 0; i < nImages; ++i){
+        similarityArray.push(similarity(imgData, imageData[i]))
+    }
+    return Math.min.apply(Math, similarityArray)
 }
 </script>
 
