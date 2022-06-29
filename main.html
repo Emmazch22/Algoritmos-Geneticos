@@ -62,6 +62,7 @@ var imageData= [] ;
 
 
 img.onload = function() {
+    generarPoblacionInicial();
     ctx.drawImage( img, 0, 0 );
     imgData= ctx.getImageData(0,0,100,100) ;
     table= document.getElementById('table') ;
@@ -72,10 +73,10 @@ img.onload = function() {
 
 function run(){
     alert("Generación de población inicial");
-    generarPoblacionInicial();
     var generation = 0;
     var minorSimilarity = 999999; //Initialize with a large value
-    while (minorSimilarity >= 3000){
+    //while (minorSimilarity >= 3000){
+    while(generation != 10){
         //Calculate the similarity of the images
         for (var i=0; i<nImages;i++){
             canvas[i]= document.createElement("canvas");
@@ -86,18 +87,19 @@ function run(){
             imageData[i]= context[i].getImageData(0,0,100,100);
             context[i].font = 'italic 10pt Calibri';
             var similarityImages = similarity(imgData, imageData[i]);
-            population[i][population[i].length] = similarityImages;
-            
+            population[i][population[i].length - 1] = similarityImages;
+            console.log(population[i]);
         }
-        selection();
-        crossover();
-        mutate();
-        minorSimilarity = getMinorSimilarity();
+        //selection();
+        //crossover();
+        //mutate();
+        //minorSimilarity = getMinorSimilarity();
         //Show the images every 500 generations
         if (generation % 500 == 0){
             showImages();
         }
-        generation += 1
+        console.log(population);
+        generation += 1;
         console.log("Generación: " + generation);
     }
     alert("Solución óptima encontrada después de: " + generation + " generaciones");
@@ -106,6 +108,7 @@ function run(){
 img.src = src;
 
 function showImages(){
+    console.log("ENTRE A SHOW IMAGES");
     for(var i = 0; i < population.length; i++){
             if (i%5==0) {
                 row= table.insertRow(table.rows.length) ;
@@ -124,7 +127,6 @@ function showImages(){
 }
 
 function getImage(context, imagen) {
-
     for(var c = 0; c < imagen.length; c++){
         if(imagen[c].tipo == "Circulo"){
             drawCircle(context,imagen[c].x1,imagen[c].y1, imagen[c].x2, imagen[c].fill,3,imagen[c].stroke) ;
@@ -221,13 +223,14 @@ function generarPoblacionInicial(){
         }
 
         population[f] = figuras;
+        population[f].push(0);
     }
 }
 
 function crossover(){
     var amountOfBadCrossovers = Math.floor(Math.random() * worstPopulation.length + 1);
     var amountOfGoodCrossovers = nImages - amountOfBadCrossovers;
-    var count = 0;
+    var count  = 0;
     var newPopulation = [];
     console.log("Cantidad de cruces malos: ");
     console.log(amountOfBadCrossovers);
@@ -241,36 +244,50 @@ function crossover(){
         len1 = image1.length;
         len2 = image2.length;
         max = get_max(len1, len2);
-        var imageArray = new Array();
+        var imageArray = [];
+        var countImages = 0;
         for (var c = 0; c < max; c += 2){
             var figure1 = image1[Math.floor(Math.random() * len1)];
             var figure2 = image2[Math.floor(Math.random() * len2)];
             var newFigure1 = new Figura(figure1.tipo, figure1.x1, figure1.y1, figure1.x2, figure1.y2, figure1.fill, figure1.stroke);
             var newFigure2 = new Figura(figure2.tipo, figure2.x1, figure2.y1, figure2.x2, figure2.y2, figure2.fill, figure2.stroke)
-            imageArray.push(newFigure1);
-            imageArray.push(newFigure2);
+            imageArray[countImages] = newFigure1;
+            countImages++;
+            imageArray[countImages] = newFigure2;
+            countImages++;
         }
-        newPopulation.push(imageArray);
+        newPopulation[count] = imageArray;
+        count++;
     }
 
     for (var x = 0; x < amountOfGoodCrossovers; x++){
-        var imageArray = new Array();
+        var imageArray = [];
         var image1 = bestPopulation[Math.floor(Math.random() * bestPopulation.length)];
         var image2 = bestPopulation[Math.floor(Math.random() * bestPopulation.length)];
         len1 = image1.length;
         len2 = image2.length;
         max = get_max(len1, len2);
+        var countImages = 0;
         for (var b = 0; b < max; b += 2){
             var figure1 = image1[Math.floor(Math.random() * len1)];
             var figure2 = image2[Math.floor(Math.random() * len2)];
             var newFigure1 = new Figura(figure1.tipo, figure1.x1, figure1.y1, figure1.x2, figure1.y2, figure1.fill, figure1.stroke);
             var newFigure2 = new Figura(figure2.tipo, figure2.x1, figure2.y1, figure2.x2, figure2.y2, figure2.fill, figure2.stroke)
-            imageArray.push(newFigure1);
-            imageArray.push(newFigure2);
+            imageArray[countImages] = newFigure1;
+            countImages++;
+            imageArray[countImages] = newFigure2;
+            countImages++;
         } 
-        newPopulation.push(imageArray);
+        //alert("Cantidad de figuras:" + imageArray.length);
+        newPopulation[count] = imageArray;
+        count++;
     } 
-    population = newPopulation;
+    bestPopulation = [];
+    worstPopulation = [];
+    population = [];
+    for(var index = 0; index < newPopulation.length; index++){
+        population[index] = newPopulation[index];
+    }
     console.log("Poblacion despues de cruces: ");
     console.log(population);
 }
@@ -292,17 +309,17 @@ function get_max(n1, n2){
 }
 
 function selection(){
-    sortPopulation();
+    //sortPopulation();
     var best = (nImages*90/100).toFixed();
     var worst = (nImages*10/100).toFixed();
     var count = 0;
     for(var i = 0; i < nImages; i++){
-        if(i < best){
-            bestPopulation[i] = population[i];
-        }else{
-            worstPopulation[count] = population[i];
-            count++;
-        }
+        // if(i < best){
+        //     bestPopulation[i] = population[i];
+        // }else{
+        //     worstPopulation[count] = population[i];
+        //     count++;
+        // }
     }
     console.log("Poblacion despues de hacer la seleccion: ");
     console.log(population);
