@@ -76,7 +76,7 @@ function run(){
     var generation = 0;
     var minorSimilarity = 999999; //Initialize with a large value
     //while (minorSimilarity >= 3000){
-    while(minorSimilarity >= 16000){
+    while(minorSimilarity >= 9000){
         //Calculate the similarity of the images
         for (var i=0; i<nImages;i++){
             canvas[i]= document.createElement("canvas");
@@ -232,6 +232,11 @@ function crossover(){
     var amountOfBadCrossovers = Math.floor(Math.random() * worstPopulation.length + 1);
     var amountOfGoodCrossovers = nImages - amountOfBadCrossovers;
     var count  = 0;
+    for(var i = 0; i < population.length;i++){
+        population[i] = population[i].filter(element => {
+            return element.tipo !== undefined;
+        });
+    }
     var newPopulation = [];
     for(var i = 0; i < amountOfBadCrossovers; i++){
         var image1 = worstPopulation[Math.floor(Math.random() * worstPopulation.length)];
@@ -252,7 +257,6 @@ function crossover(){
             countImages++;
         }
         var tempSimilarity = population[count][population[count].length - 1];
-        population.splice(count, 1);
         imageArray[imageArray.length] = tempSimilarity;
         population[count] = imageArray;
         count++;
@@ -278,14 +282,12 @@ function crossover(){
         } 
         //alert("Cantidad de figuras:" + imageArray.length);
         var tempSimilarity = population[count][population[count].length - 1];
-        population.splice(count, 1);
         imageArray[imageArray.length] = tempSimilarity;
         population[count] = imageArray;
         count++;
     } 
     bestPopulation = [];
     worstPopulation = [];
-
 }
 
 function sortPopulation(){
@@ -305,7 +307,7 @@ function get_max(n1, n2){
 }
 
 function selection(){
-    //sortPopulation();
+    sortPopulation();
     var best = (nImages*90/100).toFixed();
     var worst = (nImages*10/100).toFixed();
     var count = 0;
@@ -338,6 +340,11 @@ function selection(){
         //Change the gen of the individual
         population[randomIndividual][randomGen] = getRandomFigure(randomFigure);
         counter += 1;
+    }
+    for(var i = 0; i < population.length;i++){
+        population[i] = population[i].filter(element => {
+            return element.tipo !== undefined;
+        });
     }
 }
 /**
