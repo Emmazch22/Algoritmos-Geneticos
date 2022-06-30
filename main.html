@@ -76,7 +76,7 @@ function run(){
     var generation = 0;
     var minorSimilarity = 999999; //Initialize with a large value
     //while (minorSimilarity >= 3000){
-    while(minorSimilarity >= 3000){
+    while(minorSimilarity >= 16000){
         //Calculate the similarity of the images
         for (var i=0; i<nImages;i++){
             canvas[i]= document.createElement("canvas");
@@ -85,7 +85,6 @@ function run(){
             getImage(context[i], population[i]);
             //context[i].putImageData(imgData,0,0) ;
             imageData[i]= context[i].getImageData(0,0,100,100);
-            context[i].font = 'italic 10pt Calibri';
             var similarityImages = similarity(imgData, imageData[i]);
             population[i][population[i].length - 1] = similarityImages;
         }
@@ -97,12 +96,14 @@ function run(){
         //Show the images every 500 generations
         if (generation % 500 == 0){
             setTimeout(showImages, 2000);
-            showImages();
+            //showImages();
         }
         generation += 1;
         console.log("Generación: " + generation);
     }
     alert("Solución óptima encontrada después de: " + generation + " generaciones");
+    console.log(population);
+    showImages();
 }
 
 img.src = src;
@@ -250,7 +251,10 @@ function crossover(){
             imageArray[countImages] = newFigure2;
             countImages++;
         }
-        newPopulation[count] = imageArray;
+        var tempSimilarity = population[count][population[count].length - 1];
+        population.splice(count, 1);
+        imageArray[imageArray.length] = tempSimilarity;
+        population[count] = imageArray;
         count++;
     }
 
@@ -273,15 +277,15 @@ function crossover(){
             countImages++;
         } 
         //alert("Cantidad de figuras:" + imageArray.length);
-        newPopulation[count] = imageArray;
+        var tempSimilarity = population[count][population[count].length - 1];
+        population.splice(count, 1);
+        imageArray[imageArray.length] = tempSimilarity;
+        population[count] = imageArray;
         count++;
     } 
     bestPopulation = [];
     worstPopulation = [];
-    population = [];
-    for(var index = 0; index < newPopulation.length; index++){
-        population[index] = newPopulation[index];
-    }
+
 }
 
 function sortPopulation(){
@@ -371,7 +375,7 @@ function getRandomFigure(value){
 function getMinorSimilarity(){
     var similarityArray = [];
     for (var i = 0; i < nImages; ++i){
-        similarityArray.push(similarity(imgData, imageData[i]))
+        similarityArray.push(similarity(imgData, imageData[i]));
     }
     return Math.min.apply(Math, similarityArray)
 }
