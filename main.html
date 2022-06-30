@@ -76,7 +76,7 @@ function run(){
     var generation = 0;
     var minorSimilarity = 999999; //Initialize with a large value
     //while (minorSimilarity >= 3000){
-    while(minorSimilarity >= 9000){
+    while(minorSimilarity >= 12000){
         //Calculate the similarity of the images
         for (var i=0; i<nImages;i++){
             canvas[i]= document.createElement("canvas");
@@ -96,7 +96,7 @@ function run(){
         //Show the images every 500 generations
         if (generation % 500 == 0){
             setTimeout(showImages, 2000);
-            //showImages();
+            showImages();
         }
         generation += 1;
         console.log("Generación: " + generation);
@@ -145,8 +145,8 @@ function drawRectangle(context,x1,y1,x2,y2,fill,lineWidth,stroke) {
       context.rect(x1, y1, x2, y2);
       context.fillStyle = fill ;
       context.fill();
-      context.lineWidth = lineWidth;
-      context.strokeStyle = stroke;
+      context.lineWidth = 0;
+      context.strokeStyle = 0;
       context.stroke();
 }
 
@@ -164,8 +164,8 @@ function drawCircle(context, x,y,radius,fill,lineWidth,stroke) {
       context.arc(x, y, radius, 0, 2 * Math.PI, false);
       context.fillStyle = fill;
       context.fill();
-      context.lineWidth = lineWidth;
-      context.strokeStyle = stroke;
+      context.lineWidth = 0;
+      context.strokeStyle = 0;
       context.stroke();
 }
 
