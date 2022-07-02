@@ -25,6 +25,7 @@ Emmanuel Zúñiga - B98729
 	<H3>UNIVERSIDAD DE COSTA RICA</H3>
 <H4>GENETIC ALGORITHMS SCAFFOLDING</H4>
 LOADS AN IMAGE FROM LOREMPIXEL, CREATES RANDOM IMAGES AND ESTIMATES SIMILARITY (THE LOWER THE NUMBER THE MORE SIMILAR, ASSUMING SIMILARITY AS A PIXEL PER PIXEL COLOR COMPARISON).<BR>
+    <button onClick="run()">Ejecutar Algoritmo</button>
 
 <canvas id="canvas" width="100" height="100"></canvas> 
 <table id="table"></table>
@@ -60,7 +61,6 @@ var imgData ;
 var nImages= 20 ;
 var imageData= [] ;
 
-
 img.onload = function() {
     alert("Click derecho e inspeccionar elemento para ver flujo de la ejecución");
     generarPoblacionInicial();
@@ -68,7 +68,7 @@ img.onload = function() {
     imgData= ctx.getImageData(0,0,100,100) ;
     table= document.getElementById('table') ;
     console.log(population);
-    const myTimeout = setTimeout(run, 5000);
+    //const myTimeout = setTimeout(run, 5000);
     //run();
 }
 
