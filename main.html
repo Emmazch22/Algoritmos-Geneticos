@@ -62,6 +62,7 @@ var imageData= [] ;
 
 
 img.onload = function() {
+    alert("Click derecho e inspeccionar elemento para ver flujo de la ejecución");
     generarPoblacionInicial();
     ctx.drawImage( img, 0, 0 );
     imgData= ctx.getImageData(0,0,100,100) ;
@@ -76,7 +77,7 @@ function run(){
     var generation = 0;
     var minorSimilarity = 999999; //Initialize with a large value
     //while (minorSimilarity >= 3000){
-    while(minorSimilarity >= 12000){
+    while(minorSimilarity >= 15000){
         //Calculate the similarity of the images
         for (var i=0; i<nImages;i++){
             canvas[i]= document.createElement("canvas");
@@ -91,6 +92,7 @@ function run(){
         selection();
         crossover();
         mutate();
+        
         minorSimilarity = getMinorSimilarity();
         console.log("Mejor similaridad" + minorSimilarity);
         //Show the images every 500 generations
@@ -109,7 +111,6 @@ function run(){
 img.src = src;
 
 function showImages(){
-    console.log("ENTRE A SHOW IMAGES");
     for(var i = 0; i < population.length; i++){
             if (i%5==0) {
                 row= table.insertRow(table.rows.length) ;
@@ -332,7 +333,7 @@ function selection(){
     while (counter < total){
         //Randomly choose an individual of the population
         randomIndividual = Math.floor(Math.random() * nImages);
-        len = population[randomIndividual].length;
+        len = population[randomIndividual].length - 1;
         //Random gen of the individual
         randomGen = Math.floor(Math.random() * len);
         randomFigure = Math.floor(Math.random() * 3);
@@ -347,6 +348,8 @@ function selection(){
         });
     }
 }
+
+
 /**
  * Generates a random figure;
  **/
