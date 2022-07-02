@@ -89,9 +89,10 @@ function run(){
             var similarityImages = similarity(imgData, imageData[i]);
             population[i][population[i].length - 1] = similarityImages;
         }
+
         selection();
         crossover();
-        mutate();
+        //mutate();
         
         minorSimilarity = getMinorSimilarity();
         console.log("Mejor similaridad" + minorSimilarity);
@@ -286,7 +287,8 @@ function crossover(){
         imageArray[imageArray.length] = tempSimilarity;
         population[count] = imageArray;
         count++;
-    } 
+    }
+    deleteUndefined();
     bestPopulation = [];
     worstPopulation = [];
 }
@@ -342,11 +344,7 @@ function selection(){
         population[randomIndividual][randomGen] = getRandomFigure(randomFigure);
         counter += 1;
     }
-    for(var i = 0; i < population.length;i++){
-        population[i] = population[i].filter(element => {
-            return element.tipo !== undefined;
-        });
-    }
+    deleteUndefined();
 }
 
 
@@ -388,6 +386,15 @@ function getMinorSimilarity(){
         similarityArray.push(similarity(imgData, imageData[i]));
     }
     return Math.min.apply(Math, similarityArray)
+}
+
+/* Delete undefined objects*/
+function deleteUndefined(){
+    for(var i = 0; i < population.length;i++){
+        population[i] = population[i].filter(element => {
+            return element.tipo !== undefined;
+        });
+    }
 }
 
 </script>
