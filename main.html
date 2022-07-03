@@ -68,8 +68,6 @@ img.onload = function() {
     imgData= ctx.getImageData(0,0,100,100) ;
     table= document.getElementById('table') ;
     console.log(population);
-    //const myTimeout = setTimeout(run, 5000);
-    //run();
 }
 
 function run(){
@@ -77,7 +75,7 @@ function run(){
     var generation = 0;
     var minorSimilarity = 999999; //Initialize with a large value
     //while (minorSimilarity >= 3000){
-    while(minorSimilarity >= 15000){
+    while(minorSimilarity >= 10000){
         //Calculate the similarity of the images
         for (var i=0; i<nImages;i++){
             canvas[i]= document.createElement("canvas");
@@ -92,15 +90,21 @@ function run(){
 
         selection();
         crossover();
-        //mutate();
-        
+        mutate();
+        deleteUndefined();
+        selection();
+        for (var i=0; i<nImages;i++){
+            canvas[i]= document.createElement("canvas");
+            canvas[i].width= canvas[i].height= "100";
+            context[i]= canvas[i].getContext('2d');
+            getImage(context[i], population[i]);
+            //context[i].putImageData(imgData,0,0) ;
+            imageData[i]= context[i].getImageData(0,0,100,100);
+            var similarityImages = similarity(imgData, imageData[i]);
+            population[i][population[i].length - 1] = similarityImages;
+        }
         minorSimilarity = getMinorSimilarity();
         console.log("Mejor similaridad" + minorSimilarity);
-        //Show the images every 500 generations
-        if (generation % 500 == 0){
-            setTimeout(showImages, 2000);
-            showImages();
-        }
         generation += 1;
         console.log("Generación: " + generation);
     }
@@ -123,6 +127,7 @@ function showImages(){
             //context[i].putImageData(imgData,0,0) ;
             imageData[i] = context[i].getImageData(0,0,100,100) ;
             context[i].font = 'italic 10pt Calibri';
+            
             var similarityImages = similarity(imgData, imageData[i]);
             context[i].fillText(similarityImages,10,95);
             row.appendChild(canvas[i]) ;
@@ -230,70 +235,44 @@ function generarPoblacionInicial(){
     }
 }
 
-function crossover(){
-    var amountOfBadCrossovers = Math.floor(Math.random() * worstPopulation.length + 1);
-    var amountOfGoodCrossovers = nImages - amountOfBadCrossovers;
-    var count  = 0;
-    for(var i = 0; i < population.length;i++){
-        population[i] = population[i].filter(element => {
-            return element.tipo !== undefined;
-        });
-    }
-    var newPopulation = [];
-    for(var i = 0; i < amountOfBadCrossovers; i++){
-        var image1 = worstPopulation[Math.floor(Math.random() * worstPopulation.length)];
-        var image2 = bestPopulation[Math.floor(Math.random() * bestPopulation.length)];
-        len1 = image1.length;
-        len2 = image2.length;
-        max = get_max(len1, len2);
-        var imageArray = [];
-        var countImages = 0;
-        for (var c = 0; c < max; c += 2){
-            var figure1 = image1[Math.floor(Math.random() * len1)];
-            var figure2 = image2[Math.floor(Math.random() * len2)];
-            var newFigure1 = new Figura(figure1.tipo, figure1.x1, figure1.y1, figure1.x2, figure1.y2, figure1.fill, figure1.stroke);
-            var newFigure2 = new Figura(figure2.tipo, figure2.x1, figure2.y1, figure2.x2, figure2.y2, figure2.fill, figure2.stroke)
-            imageArray[countImages] = newFigure1;
-            countImages++;
-            imageArray[countImages] = newFigure2;
-            countImages++;
-        }
-        var tempSimilarity = population[count][population[count].length - 1];
-        imageArray[imageArray.length] = tempSimilarity;
-        population[count] = imageArray;
-        count++;
-    }
 
-    for (var x = 0; x < amountOfGoodCrossovers; x++){
-        var imageArray = [];
-        var image1 = bestPopulation[Math.floor(Math.random() * bestPopulation.length)];
-        var image2 = bestPopulation[Math.floor(Math.random() * bestPopulation.length)];
-        len1 = image1.length;
-        len2 = image2.length;
-        max = get_max(len1, len2);
-        var countImages = 0;
-        for (var b = 0; b < max; b += 2){
-            var figure1 = image1[Math.floor(Math.random() * len1)];
-            var figure2 = image2[Math.floor(Math.random() * len2)];
-            var newFigure1 = new Figura(figure1.tipo, figure1.x1, figure1.y1, figure1.x2, figure1.y2, figure1.fill, figure1.stroke);
-            var newFigure2 = new Figura(figure2.tipo, figure2.x1, figure2.y1, figure2.x2, figure2.y2, figure2.fill, figure2.stroke)
-            imageArray[countImages] = newFigure1;
-            countImages++;
-            imageArray[countImages] = newFigure2;
-            countImages++;
-        } 
-        //alert("Cantidad de figuras:" + imageArray.length);
-        var tempSimilarity = population[count][population[count].length - 1];
-        imageArray[imageArray.length] = tempSimilarity;
-        population[count] = imageArray;
-        count++;
-    }
+function crossover(){
+    var counter = 0;
+    var newPopulation = [];
     deleteUndefined();
-    bestPopulation = [];
-    worstPopulation = [];
+    while (counter < nImages){
+        var offspring = []; // n espacios para las figuras y una para la similaridad -> se deja en 0
+        var randomParent1 = Math.floor(Math.random() * nImages);
+        var randomParent2 = randomParent1;
+
+        while (randomParent1 == randomParent2){
+            randomParent2 = Math.floor(Math.random() * nImages);
+        }
+
+        var offspringSize = get_mean(population[randomParent1].length, population[randomParent2].length);
+
+        for (var i = 0; i < offspringSize; ++i){
+            var randomParent1Gen = Math.floor(Math.random() * (population[randomParent1].length - 1));
+            var randomParent2Gen = Math.floor(Math.random() * (population[randomParent2].length - 1));
+
+            var randProb = Math.random();
+
+            if (randProb < 0.50){
+                offspring[i] = population[randomParent1][randomParent1Gen];
+            } else {
+                offspring[i] = population[randomParent2][randomParent2Gen];
+            }
+        }
+        offspring.push(0);
+        newPopulation[counter] = offspring;
+        ++counter;
+    }
+    population = newPopulation;
+    //deleteUndefined();
 }
 
 function sortPopulation(){
+    // population[0][population[0].length - 1]);
     population.sort(function (a, b) {
         if (a[a.length - 1] > b[b.length - 1]) {
             return 1;
@@ -309,29 +288,26 @@ function get_max(n1, n2){
     return Math.max(n1, n2);
 }
 
+function get_mean(n1, n2){
+    return Math.floor((n1 + n2) / 2);
+}
+
+function get_min(n1, n2){
+    return Math.min(n1, n2);
+}
+
 function selection(){
     sortPopulation();
-    var best = (nImages*90/100).toFixed();
-    var worst = (nImages*10/100).toFixed();
-    var count = 0;
-    for(var i = 0; i < nImages; i++){
-        if(i < best){
-            bestPopulation[i] = population[i];
-        }else{
-            worstPopulation[count] = population[i];
-            count++;
-        }
-    }
 }
 
 /**
  * Mutate the genes of an individual, arbitrarily changing an element of the individual.
  **/
- function mutate(){
+function mutate(){
     //Randomly choose the individuals to be mutated, 10% of the total population is chosen
     total = Math.floor(population.length * 0.10);
-
-    counter = 0
+    counter = 0;
+    
     while (counter < total){
         //Randomly choose an individual of the population
         randomIndividual = Math.floor(Math.random() * nImages);
@@ -341,7 +317,8 @@ function selection(){
         randomFigure = Math.floor(Math.random() * 3);
 
         //Change the gen of the individual
-        population[randomIndividual][randomGen] = getRandomFigure(randomFigure);
+        //population[randomIndividual][randomGen] = getRandomFigure(randomFigure);
+        population[randomIndividual].splice(randomGen, 1, getRandomFigure(randomFigure));
         counter += 1;
     }
     deleteUndefined();
@@ -392,7 +369,7 @@ function getMinorSimilarity(){
 function deleteUndefined(){
     for(var i = 0; i < population.length;i++){
         population[i] = population[i].filter(element => {
-            return element.tipo !== undefined;
+            return (typeof(element) == "number" || element !== undefined || element.tipo !== undefined );
         });
     }
 }
